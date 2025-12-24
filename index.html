@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grand Luxury Tree - GitHub Edition</title>
+    <title>Grand Luxury Tree - Glowing Edition</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +46,7 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: var(--glass-border);
-            border-radius: 30px; /* 圆润设计 */
+            border-radius: 30px;
             padding: 15px 30px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             transition: all 0.3s;
@@ -56,25 +56,31 @@
             background: transparent;
             border: 1px solid var(--gold);
             color: var(--gold);
-            padding: 8px 20px;
+            padding: 8px 24px;
             cursor: pointer;
             font-family: var(--font-main);
             transition: all 0.3s;
             border-radius: 20px;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            font-weight: bold;
         }
 
         .btn:hover {
             background: var(--gold);
             color: var(--black);
-            box-shadow: 0 0 15px var(--gold);
+            box-shadow: 0 0 20px var(--gold);
         }
 
+        /* 修改：UI 定位到左下角 */
         #ui-bottom {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; z-index: 10;
+            position: absolute; 
+            bottom: 40px; 
+            left: 40px; /* 左对齐 */
+            display: flex; 
+            gap: 20px; 
+            z-index: 10;
         }
 
         #ui-top-right {
@@ -83,7 +89,7 @@
 
         #draggable-title {
             position: absolute; top: 15%; right: 10%; text-align: center;
-            z-index: 5; cursor: move; text-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+            z-index: 5; cursor: move; text-shadow: 0 0 40px rgba(212, 175, 55, 0.8);
         }
         #title-main { font-size: 4rem; font-weight: 700; color: var(--gold); line-height: 1.1; }
         #title-sub { font-size: 2rem; color: #fff; letter-spacing: 8px; margin-top: 10px; font-family: 'Cinzel', serif; }
@@ -102,22 +108,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #photo-manager {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 70%; max-width: 800px; max-height: 70vh; z-index: 100;
-            display: none; overflow-y: auto; text-align: center;
-        }
-        .photo-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px; margin-top: 20px;
-        }
-        .photo-item { 
-            position: relative; aspect-ratio: 1; border: 1px solid var(--gold); 
-            border-radius: 4px; overflow: hidden; transition: transform 0.2s;
-        }
-        .photo-item:hover { transform: scale(1.05); box-shadow: 0 0 10px var(--gold); }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
-
         .ui-hidden .glass-panel, .ui-hidden .btn, .ui-hidden #webcam-video { opacity: 0 !important; pointer-events: none; }
     </style>
 </head>
@@ -125,8 +115,8 @@
 
     <div id="loading-screen">
         <div class="loader"></div>
-        <p style="margin-top:20px; letter-spacing: 2px; color: #888;">CRAFTING LUXURY...</p>
-        <p id="loading-status" style="font-size: 0.8rem; color: #444; margin-top: 5px;">Fetching GitHub Assets</p>
+        <p style="margin-top:20px; letter-spacing: 2px; color: #888;">ILLUMINATING...</p>
+        <p id="loading-status" style="font-size: 0.8rem; color: #444; margin-top: 5px;">Fetching Assets</p>
     </div>
 
     <div id="canvas-container"></div>
@@ -138,8 +128,8 @@
         <div id="title-sub">2025</div>
     </div>
 
-    <div id="ui-bottom" class="glass-panel">
-        <button class="btn" onclick="document.getElementById('photo-manager').style.display='block'">View Gallery</button>
+    <!-- UI: 仅保留功能按钮，且位于左下角 -->
+    <div id="ui-bottom">
         <button class="btn" id="btn-music-toggle">Play Music</button>
         <button class="btn" id="btn-cam-toggle">Show Camera</button>
     </div>
@@ -147,12 +137,6 @@
     <div id="ui-top-right">
         <button class="btn" id="btn-fullscreen">⛶</button>
         <button class="btn" id="btn-clean-mode">👁</button>
-    </div>
-
-    <div id="photo-manager" class="glass-panel">
-        <h3 style="letter-spacing: 2px;">ASSET GALLERY</h3>
-        <div class="photo-grid" id="photo-grid"></div>
-        <button class="btn" style="margin-top: 20px;" onclick="document.getElementById('photo-manager').style.display='none'">Close</button>
     </div>
 
     <audio id="bgm-player" loop></audio>
@@ -170,14 +154,14 @@
         import { HandLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
         // ==========================================
-        // 🔴 GITHUB 资源配置 (仅修改这里)
+        // 🔴 GITHUB 资源配置
         // ==========================================
         const GH_CONFIG = {
-            base: 'assets/',        // 基础路径
-            bgm: 'bgm.mp3',         // 音乐文件名
-            photoCount: 11,         // 照片总数 (photo1.jpg - photo11.jpg)
-            photoPrefix: 'photo',   // 前缀
-            photoSuffix: '.jpg'     // 后缀
+            base: 'assets/',        
+            bgm: 'bgm.mp3',         
+            photoCount: 11,         
+            photoPrefix: 'photo',   
+            photoSuffix: '.jpg'     
         };
         // ==========================================
 
@@ -188,7 +172,6 @@
         let particleSystem, photoGallery, topStar;
         let video = document.getElementById('webcam-video');
         let clock = new THREE.Clock();
-        // 动态光源引用
         let movingLight1, movingLight2;
         
         let scatterFactor = 0; let targetScatterFactor = 0;
@@ -206,58 +189,42 @@
             return photos;
         }
 
-        // --- 质感升级：生成噪点纹理 (Bump Map) ---
+        // --- 纹理生成 ---
         function createNoiseTexture() {
             const size = 512;
             const canvas = document.createElement('canvas');
             canvas.width = size; canvas.height = size;
             const ctx = canvas.getContext('2d');
-            
             const imgData = ctx.createImageData(size, size);
             const data = imgData.data;
-            
             for (let i = 0; i < data.length; i += 4) {
                 const val = Math.random() * 255;
-                data[i] = val;     // R
-                data[i+1] = val;   // G
-                data[i+2] = val;   // B
-                data[i+3] = 255;   // Alpha
+                data[i] = val; data[i+1] = val; data[i+2] = val; data[i+3] = 255;
             }
             ctx.putImageData(imgData, 0, 0);
-            
             const tex = new THREE.CanvasTexture(canvas);
-            tex.wrapS = THREE.RepeatWrapping;
-            tex.wrapT = THREE.RepeatWrapping;
+            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
             return tex;
         }
 
-        // --- 质感升级：生成拐杖糖纹理 ---
         function createCandyCaneTexture() {
             const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 128;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0,0,128,128); // 略微灰白
-            
-            // 增加一点噪点底色
-            ctx.fillStyle = 'rgba(0,0,0,0.05)';
-            for(let i=0; i<100; i++) ctx.fillRect(Math.random()*128, Math.random()*128, 2, 2);
-
-            ctx.fillStyle = '#b00000'; // 深红，更有质感
+            ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0,0,128,128); 
+            ctx.fillStyle = '#b00000'; 
             ctx.beginPath();
             const stripeWidth = 16;
             for(let i=-128; i<256; i+=32) {
                 ctx.moveTo(i, 0); ctx.lineTo(i + stripeWidth, 0);
                 ctx.lineTo(i + stripeWidth - 128, 128); ctx.lineTo(i - 128, 128); ctx.fill();
             }
-            const tex = new THREE.CanvasTexture(canvas); 
-            tex.colorSpace = THREE.SRGBColorSpace; 
-            return tex;
+            const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; return tex;
         }
 
         // --- 场景初始化 ---
         function initScene() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x050505);
-            // 淡淡的雾，增加体积感
             scene.fog = new THREE.FogExp2(0x050505, 0.015);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -267,32 +234,29 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.toneMapping = THREE.ACESFilmicToneMapping; // 电影级色调
-            renderer.toneMappingExposure = 1.2;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.3; // 稍微调亮曝光
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-            // --- 灯光系统 (赋予质感的关键) ---
-            // 1. 环境光 (基础亮度)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            // --- 灯光系统 ---
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
             scene.add(ambientLight);
 
-            // 2. 主光源 (金色)
-            const dirLight = new THREE.DirectionalLight(0xffd700, 2.0);
+            const dirLight = new THREE.DirectionalLight(0xffd700, 2.5);
             dirLight.position.set(10, 50, 20);
             scene.add(dirLight);
 
-            // 3. 动态旋转光源 (制造流光溢彩)
-            movingLight1 = new THREE.PointLight(0xffaa00, 5.0, 50); // 暖橙色
-            movingLight2 = new THREE.PointLight(0x00ffff, 3.0, 50); // 青色 (冷暖对比)
+            movingLight1 = new THREE.PointLight(0xffaa00, 6.0, 60);
+            movingLight2 = new THREE.PointLight(0x00ffff, 4.0, 60);
             scene.add(movingLight1);
             scene.add(movingLight2);
 
-            // --- 后期处理 ---
+            // --- 后期处理 (Bloom) ---
             const renderScene = new RenderPass(scene, camera);
             const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.6; // 只让很亮的地方发光
-            bloomPass.strength = 0.8; 
-            bloomPass.radius = 0.5;
+            bloomPass.threshold = 0.4; // 降低阈值，让更多金色部分发光
+            bloomPass.strength = 1.2; // 增强发光强度
+            bloomPass.radius = 0.6; // 扩散半径
 
             composer = new EffectComposer(renderer);
             composer.addPass(renderScene);
@@ -321,10 +285,9 @@
             const extrudeSettings = { steps: 1, depth: 1, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 2 };
             const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
             
-            // 星星材质：高自发光
             const material = new THREE.MeshStandardMaterial({ 
                 color: 0xffea00, 
-                emissive: 0xffaa00, emissiveIntensity: 2.0, 
+                emissive: 0xffaa00, emissiveIntensity: 3.0, // 强烈的星光
                 roughness: 0.2, metalness: 0.8 
             });
             topStar = new THREE.Mesh(geometry, material);
@@ -332,45 +295,43 @@
             scene.add(topStar);
         }
 
-        // --- 粒子系统 (高质感版) ---
+        // --- 粒子系统 (高光发光版) ---
         class LuxuryParticles {
             constructor() {
                 this.dummy = new THREE.Object3D();
                 this.count = config.particleCount;
                 
                 const geoCube = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                const geoSphere = new THREE.SphereGeometry(0.35, 16, 16); // 增加细分，更圆润
+                const geoSphere = new THREE.SphereGeometry(0.35, 16, 16);
                 const geoCandy = new THREE.PlaneGeometry(0.5, 1.5);
                 
-                // 噪点贴图 (让表面不那么平滑，产生细碎反光)
                 const noiseMap = createNoiseTexture();
 
-                // 材质 1: 金色 (磨砂金质感)
+                // 材质 1: 闪耀金 (加强 Emissive)
                 const matGold = new THREE.MeshStandardMaterial({ 
                     color: 0xffd700, 
-                    roughness: 0.3, // 稍微粗糙一点，配合 bumpMap
-                    metalness: 1.0, // 全金属
+                    roughness: 0.2, // 更光滑
+                    metalness: 0.9, 
                     bumpMap: noiseMap,
                     bumpScale: 0.05,
-                    emissive: 0x332200, // 微微自发光，防止全黑
-                    envMapIntensity: 1.0
+                    emissive: 0xff8800, // 橙金色自发光
+                    emissiveIntensity: 0.8, // 亮度提升
+                    envMapIntensity: 1.5
                 });
 
-                // 材质 2: 祖母绿 (深邃质感)
+                // 材质 2: 荧光祖母绿
                 const matEmerald = new THREE.MeshStandardMaterial({ 
                     color: 0x00aa44, 
-                    roughness: 0.1, // 光滑
-                    metalness: 0.5,
-                    emissive: 0x002211,
+                    roughness: 0.1,
+                    metalness: 0.6,
+                    emissive: 0x004422, // 深绿自发光
+                    emissiveIntensity: 0.6,
                     bumpMap: noiseMap,
                     bumpScale: 0.02
                 });
 
-                // 材质 3: 拐杖糖 (基础材质即可，保持清晰)
                 const matCandy = new THREE.MeshBasicMaterial({ 
-                    map: createCandyCaneTexture(), 
-                    side: THREE.DoubleSide, 
-                    transparent: true 
+                    map: createCandyCaneTexture(), side: THREE.DoubleSide, transparent: true 
                 });
 
                 const nCube = Math.floor(this.count * 0.4);
@@ -381,7 +342,6 @@
                 this.meshSphere = new THREE.InstancedMesh(geoSphere, matGold, nSphere);
                 this.meshCandy = new THREE.InstancedMesh(geoCandy, matCandy, nCandy);
 
-                // 确保不被剔除
                 this.meshCube.frustumCulled = false;
                 this.meshSphere.frustumCulled = false;
                 this.meshCandy.frustumCulled = false;
@@ -422,11 +382,8 @@
                     d.curr.lerpVectors(d.tree, d.scatter, scatterFactor);
                     this.dummy.position.copy(d.curr);
                     this.dummy.position.y += Math.sin(time*2 + d.rnd) * 0.2; 
-                    
-                    // 增加自转，展示光泽
                     this.dummy.rotation.x = time * d.speed + d.rnd;
                     this.dummy.rotation.y = time * d.speed + d.rnd;
-                    
                     this.dummy.updateMatrix();
                     d.meshRef.setMatrixAt(d.meshIndex, this.dummy.matrix);
                 }
@@ -449,12 +406,9 @@
             createFrameTexture() {
                 const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 614;
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(0, 0, canvas.width, canvas.height); // 浅灰白
-                
-                // 增加相纸纹理
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'rgba(0,0,0,0.03)';
                 for(let i=0;i<5000;i++) ctx.fillRect(Math.random()*512, Math.random()*614, 1, 1);
-
                 ctx.font = '700 100px "Cinzel", serif'; ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.fillText('LOVE', canvas.width / 2, canvas.height * 0.9);
                 const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; return tex;
@@ -462,8 +416,7 @@
 
             async initGallery() {
                 const photos = await getPhotos();
-                this.updateDOM(photos);
-                
+                // 仅用于加载3D照片，不再更新DOM Gallery
                 photos.forEach((p, i) => {
                     this.loader.load(p.url, (tex) => {
                         tex.colorSpace = THREE.SRGBColorSpace;
@@ -494,15 +447,6 @@
                         this.group.add(itemGroup);
                         this.items.push({ obj: itemGroup, treePos: treePos, scatterPos: scatterPos, originalRot: itemGroup.rotation.clone(), curr: treePos.clone() });
                     });
-                });
-            }
-
-            updateDOM(photos) {
-                const grid = document.getElementById('photo-grid'); grid.innerHTML = '';
-                photos.forEach(p => {
-                    const el = document.createElement('div'); el.className = 'photo-item';
-                    el.innerHTML = `<img src="${p.url}">`; // 纯展示，无删除
-                    grid.appendChild(el);
                 });
             }
         }
@@ -586,7 +530,6 @@
             document.getElementById('btn-clean-mode').onclick = () => { document.body.classList.toggle('ui-hidden'); };
 
             const bgm = document.getElementById('bgm-player');
-            // 设置 BGM 路径
             bgm.src = GH_CONFIG.base + GH_CONFIG.bgm;
             
             document.getElementById('btn-music-toggle').onclick = () => {
@@ -614,11 +557,9 @@
                 else scene.rotation.y += treeRotationSpeed;
             }
             
-            // 动态光照移动
             if(movingLight1 && movingLight2) {
                 movingLight1.position.x = Math.sin(t * 0.5) * 30;
                 movingLight1.position.z = Math.cos(t * 0.5) * 30;
-                
                 movingLight2.position.x = Math.sin(t * 0.8 + Math.PI) * 25;
                 movingLight2.position.z = Math.cos(t * 0.8 + Math.PI) * 25;
                 movingLight2.position.y = 10 + Math.sin(t) * 10;
