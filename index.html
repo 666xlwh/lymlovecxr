@@ -231,7 +231,7 @@
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             // 修改：拉远距离到 65，让树看起来小一点，视野更开阔
-            camera.position.set(0, 20, 65); 
+            camera.position.set(0, 20, 70); 
             camera.lookAt(0,0,0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -321,7 +321,7 @@
                     bumpMap: noiseMap,
                     bumpScale: 0.05,
                     emissive: 0xff8800, 
-                    emissiveIntensity: 2.5, 
+                    emissiveIntensity: 1.5, 
                     envMapIntensity: 1.0
                 });
 
@@ -332,7 +332,7 @@
                     roughness: 0.1,
                     metalness: 0.6,
                     emissive: 0x004422, 
-                    emissiveIntensity: 2.5, 
+                    emissiveIntensity: 1.5, 
                     bumpMap: noiseMap,
                     bumpScale: 0.02
                 });
