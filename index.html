@@ -73,7 +73,6 @@
             box-shadow: 0 0 20px var(--gold);
         }
 
-        /* 左下角按钮 */
         #ui-bottom {
             position: absolute; 
             bottom: 40px; 
@@ -99,16 +98,10 @@
             z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 1s;
         }
-        /* Loading 文字样式 */
         .loading-text {
-            margin-top: 20px; 
-            letter-spacing: 4px; 
-            color: var(--gold);
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px var(--gold);
+            margin-top: 20px; letter-spacing: 4px; color: var(--gold);
+            font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 10px var(--gold);
         }
-
         .loader {
             width: 60px; height: 60px;
             border: 3px solid rgba(212, 175, 55, 0.2);
@@ -125,7 +118,6 @@
 
     <div id="loading-screen">
         <div class="loader"></div>
-        <!-- 修改点：Loading 文字 -->
         <p class="loading-text">圣诞快乐宝宝</p>
         <p id="loading-status" style="font-size: 0.8rem; color: #444; margin-top: 5px;">Fetching Assets</p>
     </div>
@@ -139,7 +131,6 @@
         <div id="title-sub">2025</div>
     </div>
 
-    <!-- UI: 仅保留功能按钮，且位于左下角 -->
     <div id="ui-bottom">
         <button class="btn" id="btn-music-toggle">Play Music</button>
         <button class="btn" id="btn-cam-toggle">Show Camera</button>
@@ -239,8 +230,8 @@
             scene.fog = new THREE.FogExp2(0x050505, 0.015);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            // 修改点：拉近相机距离，从 80 改为 45，让树直接变大
-            camera.position.set(0, 20, 45); 
+            // 修改：拉远距离到 65，让树看起来小一点，视野更开阔
+            camera.position.set(0, 20, 65); 
             camera.lookAt(0,0,0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -266,8 +257,7 @@
             // --- 后期处理 (Bloom) ---
             const renderScene = new RenderPass(scene, camera);
             
-            // 修改点：提高阈值，防止照片发光
-            // threshold: 0.85 (只有非常亮的东西才发光)
+            // 阈值保持 0.85，只有高亮粒子发光，照片(0.8)不发光
             const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
             bloomPass.threshold = 0.85; 
             bloomPass.strength = 1.2; 
@@ -302,7 +292,7 @@
             
             const material = new THREE.MeshStandardMaterial({ 
                 color: 0xffea00, 
-                emissive: 0xffaa00, emissiveIntensity: 4.0, // 强烈的星光
+                emissive: 0xffaa00, emissiveIntensity: 4.0, 
                 roughness: 0.2, metalness: 0.8 
             });
             topStar = new THREE.Mesh(geometry, material);
@@ -310,7 +300,7 @@
             scene.add(topStar);
         }
 
-        // --- 粒子系统 (高光发光版) ---
+        // --- 粒子系统 (亮度调整版) ---
         class LuxuryParticles {
             constructor() {
                 this.dummy = new THREE.Object3D();
@@ -322,7 +312,8 @@
                 
                 const noiseMap = createNoiseTexture();
 
-                // 材质 1: 闪耀金 (大幅加强 Emissive 以突破 0.85 的阈值)
+                // 材质 1: 闪耀金
+                // 修改：降低 emissiveIntensity 从 4.0 -> 1.2，避免过曝
                 const matGold = new THREE.MeshStandardMaterial({ 
                     color: 0xffd700, 
                     roughness: 0.2, 
@@ -330,17 +321,18 @@
                     bumpMap: noiseMap,
                     bumpScale: 0.05,
                     emissive: 0xff8800, 
-                    emissiveIntensity: 4.0, // 提升亮度确保发光
-                    envMapIntensity: 1.5
+                    emissiveIntensity: 2.5, 
+                    envMapIntensity: 1.0
                 });
 
                 // 材质 2: 荧光祖母绿
+                // 修改：同步降低亮度
                 const matEmerald = new THREE.MeshStandardMaterial({ 
                     color: 0x00aa44, 
                     roughness: 0.1,
                     metalness: 0.6,
                     emissive: 0x004422, 
-                    emissiveIntensity: 3.0, // 提升亮度确保发光
+                    emissiveIntensity: 2.5, 
                     bumpMap: noiseMap,
                     bumpScale: 0.02
                 });
@@ -421,7 +413,7 @@
             createFrameTexture() {
                 const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 614;
                 const ctx = canvas.getContext('2d');
-                // 修改点：相纸颜色变暗，确保不发光 (0xcccccc)
+                // 修改：相纸颜色 0xcccccc
                 ctx.fillStyle = '#cccccc'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'rgba(0,0,0,0.03)';
                 for(let i=0;i<5000;i++) ctx.fillRect(Math.random()*512, Math.random()*614, 1, 1);
@@ -442,21 +434,21 @@
                         const itemGroup = new THREE.Group();
                         const frameGeo = new THREE.PlaneGeometry(5, 6);
                         
-                        // 修改点：使用 MeshBasicMaterial 并设置颜色为灰色，确保绝对不发光
+                        // 修改：MeshBasicMaterial + 灰色，确保不发光
                         const frameMat = new THREE.MeshBasicMaterial({ 
                             map: this.frameTexture, 
                             side: THREE.DoubleSide,
-                            color: 0xbbbbbb // 压暗颜色
+                            color: 0xcccccc 
                         }); 
                         const frame = new THREE.Mesh(frameGeo, frameMat);
                         frame.position.z = -0.01; itemGroup.add(frame);
 
                         const photoGeo = new THREE.PlaneGeometry(w, h);
-                        // 修改点：照片也使用 MeshBasicMaterial 并压暗
+                        // 修改：MeshBasicMaterial + 灰色，确保不发光
                         const photoMat = new THREE.MeshBasicMaterial({ 
                             map: tex, 
                             side: THREE.DoubleSide,
-                            color: 0xcccccc // 压暗颜色
+                            color: 0xcccccc
                         });
                         const photoMesh = new THREE.Mesh(photoGeo, photoMat);
                         photoMesh.position.y = 0.5; photoMesh.position.z = 0.01; itemGroup.add(photoMesh);
