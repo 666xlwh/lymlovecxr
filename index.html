@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grand Luxury Tree - Christmas 2025</title>
+    <title>Merry Christmas Baby</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -17,7 +17,6 @@
             --glass-bg: rgba(10, 10, 10, 0.5);
             --glass-border: 1px solid rgba(212, 175, 55, 0.2);
             --font-main: 'Cinzel', serif;
-            --font-chinese: 'Ma Shan Zheng', cursive; /* 引入中文字体 */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
@@ -74,7 +73,7 @@
             box-shadow: 0 0 20px var(--gold);
         }
 
-        /* 左下角 UI */
+        /* 左下角按钮 */
         #ui-bottom {
             position: absolute; 
             bottom: 40px; 
@@ -100,6 +99,16 @@
             z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 1s;
         }
+        /* Loading 文字样式 */
+        .loading-text {
+            margin-top: 20px; 
+            letter-spacing: 4px; 
+            color: var(--gold);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--gold);
+        }
+
         .loader {
             width: 60px; height: 60px;
             border: 3px solid rgba(212, 175, 55, 0.2);
@@ -109,15 +118,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Loading 文字样式微调，支持中文显示 */
-        #loading-text {
-            margin-top: 20px; 
-            letter-spacing: 2px; 
-            color: #d4af37; /* 金色字体 */
-            font-family: 'Ma Shan Zheng', cursive, sans-serif; /* 中文字体 */
-            font-size: 1.5rem;
-        }
-
         .ui-hidden .glass-panel, .ui-hidden .btn, .ui-hidden #webcam-video { opacity: 0 !important; pointer-events: none; }
     </style>
 </head>
@@ -125,9 +125,9 @@
 
     <div id="loading-screen">
         <div class="loader"></div>
-        <!-- 修改：加载文字改为“圣诞快乐宝宝” -->
-        <p id="loading-text">圣诞快乐宝宝</p>
-        <p id="loading-status" style="font-size: 0.8rem; color: #444; margin-top: 5px; font-family: sans-serif;">Fetching Assets</p>
+        <!-- 修改点：Loading 文字 -->
+        <p class="loading-text">圣诞快乐宝宝</p>
+        <p id="loading-status" style="font-size: 0.8rem; color: #444; margin-top: 5px;">Fetching Assets</p>
     </div>
 
     <div id="canvas-container"></div>
@@ -139,7 +139,7 @@
         <div id="title-sub">2025</div>
     </div>
 
-    <!-- UI: 左下角功能键 -->
+    <!-- UI: 仅保留功能按钮，且位于左下角 -->
     <div id="ui-bottom">
         <button class="btn" id="btn-music-toggle">Play Music</button>
         <button class="btn" id="btn-cam-toggle">Show Camera</button>
@@ -239,17 +239,15 @@
             scene.fog = new THREE.FogExp2(0x050505, 0.015);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            
-            // --- 修改：拉近初始视角 ---
-            // 之前的距离是 80，现在改为 55，让树直接看起来更大
-            camera.position.set(0, 15, 55); 
+            // 修改点：拉近相机距离，从 80 改为 45，让树直接变大
+            camera.position.set(0, 20, 45); 
             camera.lookAt(0,0,0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.3; 
+            renderer.toneMappingExposure = 1.3;
             document.getElementById('canvas-container').appendChild(renderer.domElement);
 
             // --- 灯光系统 ---
@@ -267,8 +265,11 @@
 
             // --- 后期处理 (Bloom) ---
             const renderScene = new RenderPass(scene, camera);
+            
+            // 修改点：提高阈值，防止照片发光
+            // threshold: 0.85 (只有非常亮的东西才发光)
             const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-            bloomPass.threshold = 0.4; 
+            bloomPass.threshold = 0.85; 
             bloomPass.strength = 1.2; 
             bloomPass.radius = 0.6; 
 
@@ -301,7 +302,7 @@
             
             const material = new THREE.MeshStandardMaterial({ 
                 color: 0xffea00, 
-                emissive: 0xffaa00, emissiveIntensity: 3.0, 
+                emissive: 0xffaa00, emissiveIntensity: 4.0, // 强烈的星光
                 roughness: 0.2, metalness: 0.8 
             });
             topStar = new THREE.Mesh(geometry, material);
@@ -321,6 +322,7 @@
                 
                 const noiseMap = createNoiseTexture();
 
+                // 材质 1: 闪耀金 (大幅加强 Emissive 以突破 0.85 的阈值)
                 const matGold = new THREE.MeshStandardMaterial({ 
                     color: 0xffd700, 
                     roughness: 0.2, 
@@ -328,16 +330,17 @@
                     bumpMap: noiseMap,
                     bumpScale: 0.05,
                     emissive: 0xff8800, 
-                    emissiveIntensity: 0.8, 
+                    emissiveIntensity: 4.0, // 提升亮度确保发光
                     envMapIntensity: 1.5
                 });
 
+                // 材质 2: 荧光祖母绿
                 const matEmerald = new THREE.MeshStandardMaterial({ 
                     color: 0x00aa44, 
                     roughness: 0.1,
                     metalness: 0.6,
                     emissive: 0x004422, 
-                    emissiveIntensity: 0.6,
+                    emissiveIntensity: 3.0, // 提升亮度确保发光
                     bumpMap: noiseMap,
                     bumpScale: 0.02
                 });
@@ -418,7 +421,8 @@
             createFrameTexture() {
                 const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 614;
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // 修改点：相纸颜色变暗，确保不发光 (0xcccccc)
+                ctx.fillStyle = '#cccccc'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'rgba(0,0,0,0.03)';
                 for(let i=0;i<5000;i++) ctx.fillRect(Math.random()*512, Math.random()*614, 1, 1);
                 ctx.font = '700 100px "Cinzel", serif'; ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -437,12 +441,23 @@
 
                         const itemGroup = new THREE.Group();
                         const frameGeo = new THREE.PlaneGeometry(5, 6);
-                        const frameMat = new THREE.MeshBasicMaterial({ map: this.frameTexture, side: THREE.DoubleSide }); 
+                        
+                        // 修改点：使用 MeshBasicMaterial 并设置颜色为灰色，确保绝对不发光
+                        const frameMat = new THREE.MeshBasicMaterial({ 
+                            map: this.frameTexture, 
+                            side: THREE.DoubleSide,
+                            color: 0xbbbbbb // 压暗颜色
+                        }); 
                         const frame = new THREE.Mesh(frameGeo, frameMat);
                         frame.position.z = -0.01; itemGroup.add(frame);
 
                         const photoGeo = new THREE.PlaneGeometry(w, h);
-                        const photoMat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+                        // 修改点：照片也使用 MeshBasicMaterial 并压暗
+                        const photoMat = new THREE.MeshBasicMaterial({ 
+                            map: tex, 
+                            side: THREE.DoubleSide,
+                            color: 0xcccccc // 压暗颜色
+                        });
                         const photoMesh = new THREE.Mesh(photoGeo, photoMat);
                         photoMesh.position.y = 0.5; photoMesh.position.z = 0.01; itemGroup.add(photoMesh);
 
